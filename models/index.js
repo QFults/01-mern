@@ -1,3 +1,3 @@
 module.exports = {
-  // your models here...
+  Item: require('./Item.js')
 }
