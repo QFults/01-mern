@@ -1,7 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ItemAPI from './utils/ItemAPI'
+import ItemContext from './utils/ItemContext'
+import { Container, Row, Col } from 'reactstrap'
+import Form from './components/Form'
+import Jumbotron from './components/Jumbotron'
+import List from './components/List'
+import Navbar from './components/Navbar'
 
 const {
+  getItems,
   createItem,
   deleteItem  
 } = ItemAPI
@@ -27,15 +34,45 @@ const App = () => {
         items.push(item)
         setItemState({ ...itemState, items, item: '' })
       })
+      .catch(err => console.error(err))
   }
 
-  itemState.handleDeleteItem = item => {
+  itemState.handleDeleteItem = id => {
     let items = JSON.parse(JSON.stringify(itemState.items))
-    items = items.filter(itm => itm !== item)
-    setItemState({ ...itemState, items })
+    deleteItem(id)
+      .then(() => {
+        items = items.filter(item => item._id !== id)
+        setItemState({ ...itemState, items })
+      })
+      .catch(err => console.error(err))
   }
+
+  useEffect(() => {
+    getItems()
+      .then(({ data: items }) => {
+        setItemState({ ...itemState, items })
+      })
+  }, [])
+
   return (
-    <h1>Hello World!</h1>
+    <>
+      <Navbar />
+      <Container>
+        <Row>
+          <Jumbotron />
+        </Row>
+        <Row>
+          <ItemContext.Provider value={itemState}>
+            <Col xs={6}>
+              <Form />
+            </Col>
+            <Col xs={6}>
+              <List />
+            </Col>
+          </ItemContext.Provider>
+        </Row>
+      </Container>
+    </>
   )
 }
 
